@@ -1,0 +1,393 @@
+<%--
+  Created by IntelliJ IDEA.
+  User: savindu umantha
+  Date: 6/2/2025
+  Time: 7:45 PM
+  To change this template use File | Settings | File Templates.
+--%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auction Details - DraftX</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container">
+    <a class="navbar-brand" href="index.jsp">
+      <img src="img/logo.png" alt="DraftX" height="40">
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="index.jsp">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="dashboard.jsp">Auctions</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="my-bids.jsp">My Bids</a>
+        </li>
+      </ul>
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+            <i class="bi bi-person-circle me-1"></i> User Profile
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="#">My Account</a></li>
+            <li><a class="dropdown-item" href="my-bids.jsp">Bidding History</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="index.jsp">Logout</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Auction Details Content -->
+<div class="container mt-4">
+  <div class="row">
+    <!-- Main Auction Area -->
+    <div class="col-lg-8">
+      <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+          <h2 class="h4 mb-0">IPL 2024 Mega Auction - Live</h2>
+        </div>
+        <div class="card-body">
+          <c:choose>
+            <c:when test="${not empty player}">
+          <div class="row">
+            <div class="col-md-6">
+              <img src="${player.image_path}" class="img-fluid rounded mb-3" alt="IPL 2024">
+            </div>
+            <div class="col-md-6">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="badge bg-success">Live</span>
+                <span class="text-muted">Ends in 2h 15m</span>
+              </div>
+              <div class="progress mb-3">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 65%"></div>
+              </div>
+              <div class="mb-3">
+                <h4 class="mb-1">Current Player: ${player.name}</h4>
+                <p class="text-muted mb-2">${player.player_type} | ${player.country}</p>
+                <div class="d-flex justify-content-between">
+                  <span>Base Price:</span>
+                  <strong>$${player.basePrice}M</strong>
+                </div>
+                <div class="d-flex justify-content-between">
+                  <span>Current Bid:</span>
+                  <strong class="text-danger">$${player.currentBid}M</strong>
+                </div>
+                <div class="d-flex justify-content-between">
+                  <span>Bid By:</span>
+                  <strong>Royal Challengers</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+            </c:when>
+            <c:otherwise>
+
+            </c:otherwise>
+          </c:choose>
+
+
+          <!-- Bidding Controls -->
+          <div class="bidding-panel mt-4 p-3 bg-light rounded">
+            <h5 class="mb-3">Place Your Bid</h5>
+            <div class="row align-items-center">
+              <div class="col-md-6 mb-3">
+                <div class="input-group">
+                  <span class="input-group-text">$</span>
+                  <input type="number" class="form-control" id="bidAmount" value="1900000" min="1850000" step="25000">
+                  <button class="btn btn-outline-secondary" type="button" id="quickBid">+25K</button>
+                </div>
+                <div class="form-text">Minimum next bid: $1.85M</div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <button class="btn btn-success w-100" id="placeBid">Place Bid ($1.9M)</button>
+              </div>
+            </div>
+            <div class="alert alert-warning mt-2">
+              <strong>Note:</strong> You currently have $2.5M remaining in your auction budget.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Player Statistics -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h3 class="h5 mb-0">Player Statistics</h3>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-bordered">
+              <thead class="table-light">
+              <tr>
+                <th>Format</th>
+                <th>Matches</th>
+                <th>Runs</th>
+                <th>Avg</th>
+                <th>SR</th>
+                <th>100s/50s</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td>Test</td>
+                <td>111</td>
+                <td>8,676</td>
+                <td>49.29</td>
+                <td>55.23</td>
+                <td>29/29</td>
+              </tr>
+              <tr>
+                <td>ODI</td>
+                <td>275</td>
+                <td>12,898</td>
+                <td>57.32</td>
+                <td>93.62</td>
+                <td>46/65</td>
+              </tr>
+              <tr>
+                <td>T20I</td>
+                <td>115</td>
+                <td>4,008</td>
+                <td>52.73</td>
+                <td>137.96</td>
+                <td>1/37</td>
+              </tr>
+              <tr>
+                <td>IPL</td>
+                <td>237</td>
+                <td>7,263</td>
+                <td>37.24</td>
+                <td>130.02</td>
+                <td>7/50</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+      <!-- Auction Info -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h3 class="h5 mb-0">Auction Information</h3>
+        </div>
+        <div class="card-body">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              Total Players
+              <span class="badge bg-primary rounded-pill">150</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              Players Sold
+              <span class="badge bg-success rounded-pill">98</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              Players Unsold
+              <span class="badge bg-secondary rounded-pill">10</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              Teams Participating
+              <span class="badge bg-info rounded-pill">10</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Recent Bids -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h3 class="h5 mb-0">Recent Bids</h3>
+        </div>
+        <div class="card-body p-0">
+          <div class="list-group list-group-flush">
+            <div class="list-group-item">
+              <div class="d-flex justify-content-between">
+                <span>Jasprit Bumrah</span>
+                <strong>$1.6M</strong>
+              </div>
+              <small class="text-muted">Mumbai Indians - 5 min ago</small>
+            </div>
+            <div class="list-group-item">
+              <div class="d-flex justify-content-between">
+                <span>Rashid Khan</span>
+                <strong>$1.4M</strong>
+              </div>
+              <small class="text-muted">Gujarat Titans - 12 min ago</small>
+            </div>
+            <div class="list-group-item">
+              <div class="d-flex justify-content-between">
+                <span>Jos Buttler</span>
+                <strong>$1.2M</strong>
+              </div>
+              <small class="text-muted">Rajasthan Royals - 20 min ago</small>
+            </div>
+            <div class="list-group-item">
+              <div class="d-flex justify-content-between">
+                <span>Glenn Maxwell</span>
+                <strong>$1.1M</strong>
+              </div>
+              <small class="text-muted">Royal Challengers - 28 min ago</small>
+            </div>
+            <div class="list-group-item">
+              <div class="d-flex justify-content-between">
+                <span>Kagiso Rabada</span>
+                <strong>$1.0M</strong>
+              </div>
+              <small class="text-muted">Punjab Kings - 35 min ago</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- My Team Status -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="h5 mb-0">My Team Status</h3>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between mb-1">
+              <span>Budget Remaining:</span>
+              <strong>$2.5M</strong>
+            </div>
+            <div class="progress" style="height: 10px;">
+              <div class="progress-bar bg-success" role="progressbar" style="width: 62%"></div>
+            </div>
+            <small class="text-muted">$4M initial budget</small>
+          </div>
+          <div class="mb-3">
+            <div class="d-flex justify-content-between mb-1">
+              <span>Players Acquired:</span>
+              <strong>5/8</strong>
+            </div>
+            <div class="progress" style="height: 10px;">
+              <div class="progress-bar bg-info" role="progressbar" style="width: 62%"></div>
+            </div>
+          </div>
+          <div class="mt-4">
+            <h6 class="mb-2">Players Bought:</h6>
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                Rohit Sharma
+                <span class="badge bg-primary rounded-pill">$1.2M</span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                Hardik Pandya
+                <span class="badge bg-primary rounded-pill">$900K</span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                Jofra Archer
+                <span class="badge bg-primary rounded-pill">$800K</span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                KL Rahul
+                <span class="badge bg-primary rounded-pill">$1.1M</span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                Yuzvendra Chahal
+                <span class="badge bg-primary rounded-pill">$700K</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-dark text-white py-4 mt-5">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <h5>About DraftX</h5>
+        <p>The ultimate platform for cricket enthusiasts to build their dream teams through competitive player auctions.</p>
+      </div>
+      <div class="col-md-4 mb-3">
+        <h5>Quick Links</h5>
+        <ul class="list-unstyled">
+          <li><a href="index.jsp" class="text-white">Home</a></li>
+          <li><a href="dashboard.jsp" class="text-white">Auctions</a></li>
+          <li><a href="my-bids.jsp" class="text-white">My Bids</a></li>
+        </ul>
+      </div>
+      <div class="col-md-4 mb-3">
+        <h5>Contact Us</h5>
+        <address>
+          Email: <a href="mailto:info@draftx.com" class="text-white">info@draftx.com</a><br>
+          Phone: +1 (123) 456-7890
+        </address>
+      </div>
+    </div>
+    <hr>
+    <div class="text-center">
+      <p class="mb-0">&copy; 2024 DraftX. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/script.js"></script>
+<script>
+  // Bidding functionality
+  const bidAmountInput = document.getElementById('bidAmount');
+  const quickBidBtn = document.getElementById('quickBid');
+  const placeBidBtn = document.getElementById('placeBid');
+
+  quickBidBtn.addEventListener('click', function() {
+    const currentBid = parseFloat(bidAmountInput.value);
+    bidAmountInput.value = currentBid + 25000;
+    updateBidButton();
+  });
+
+  function updateBidButton() {
+    placeBidBtn.textContent = 'Place Bid ($' + (bidAmountInput.value / 1000000).toFixed(2) + 'M)';
+  }
+
+  placeBidBtn.addEventListener('click', function() {
+    const bidAmount = parseFloat(bidAmountInput.value);
+    if (bidAmount < 1850000) {
+      alert('Bid amount must be at least $1.85M');
+      return;
+    }
+
+    // Here you would typically send the bid to your server
+    alert('Bid of $' + (bidAmount / 1000000).toFixed(2) + 'M placed successfully!');
+
+    // For demo, we'll just update the UI
+    const recentBids = document.querySelector('.list-group');
+    const newBid = document.createElement('div');
+    newBid.className = 'list-group-item';
+    newBid.innerHTML = '<div class="d-flex justify-content-between">' +
+            '<span>Virat Kohli</span>' +
+            '<strong>$' + (bidAmount / 1000000).toFixed(2) + 'M</strong>' +
+            '</div>' +
+            '<small class="text-muted">Your Team - just now</small>';
+    recentBids.prepend(newBid);
+
+    // Update current bid display
+    document.querySelector('.text-danger').textContent = '$' + (bidAmount / 1000000).toFixed(2) + 'M';
+  });
+</script>
+</body>
+</html>
