@@ -400,7 +400,7 @@
         const host = window.location.host;
         const contextPath = '${pageContext.request.contextPath}' || '';
         const endpoint = '/bidupdates';
-
+//
         const wsUrl = protocol + host + contextPath + endpoint;
         console.log('Attempting to connect to:', wsUrl);
 
