@@ -8,7 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
-@WebFilter(urlPatterns = {"/index.jsp", "/auction-details.jsp",})
+@WebFilter(urlPatterns = {"/index.jsp", "/auction-details.jsp","/","/home"})
 public class AuthFilter implements Filter {
 
     @Override

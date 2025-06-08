@@ -11,21 +11,22 @@ import jakarta.persistence.*;
 public class User {
     @Id
     private String email;
-    private String name;
-    private String contact;
-    private String password;
     private String team_name;
+    private String owner_name;
+    private String owner_contact;
+    private String password;
+
 
 
     public User() {
     }
 
-    public User(String email, String name, String contact, String password, String team_name) {
+    public User(String email, String team_name, String owner_name, String owner_contact, String password) {
         this.email = email;
-        this.name = name;
-        this.contact = contact;
-        this.password = password;
         this.team_name = team_name;
+        this.owner_name = owner_name;
+        this.owner_contact = owner_contact;
+        this.password = password;
     }
 
     public String getEmail() {
@@ -36,20 +37,28 @@ public class User {
         this.email = email;
     }
 
-    public String getName() {
-        return name;
+    public String getTeam_name() {
+        return team_name;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setTeam_name(String team_name) {
+        this.team_name = team_name;
     }
 
-    public String getContact() {
-        return contact;
+    public String getOwner_name() {
+        return owner_name;
     }
 
-    public void setContact(String contact) {
-        this.contact = contact;
+    public void setOwner_name(String owner_name) {
+        this.owner_name = owner_name;
+    }
+
+    public String getOwner_contact() {
+        return owner_contact;
+    }
+
+    public void setOwner_contact(String owner_contact) {
+        this.owner_contact = owner_contact;
     }
 
     public String getPassword() {
@@ -58,13 +67,5 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public String getTeam_name() {
-        return team_name;
-    }
-
-    public void setTeam_name(String team_name) {
-        this.team_name = team_name;
     }
 }

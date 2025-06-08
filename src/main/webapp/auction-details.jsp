@@ -6,6 +6,8 @@
   To change this template use File | Settings | File Templates.
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -106,19 +108,22 @@
           <!-- Bidding Controls -->
           <div class="bidding-panel mt-4 p-3 bg-light rounded">
             <h5 class="mb-3">Place Your Bid</h5>
+            <form class="bid-form" method="POST" action="${pageContext.request.contextPath}/placebid">
+              <input type="hidden" name="playerId" value="${not empty player ? player.id : ''}">
             <div class="row align-items-center">
               <div class="col-md-6 mb-3">
                 <div class="input-group">
                   <span class="input-group-text">$</span>
-                  <input type="number" class="form-control" id="bidAmount" value="1900000" min="1850000" step="25000">
+                  <input type="number" class="form-control" id="bidAmount" name="bidAmount" value="1900000" min="1850000" step="25000">
                   <button class="btn btn-outline-secondary" type="button" id="quickBid">+25K</button>
                 </div>
                 <div class="form-text">Minimum next bid: $1.85M</div>
               </div>
               <div class="col-md-6 mb-3">
-                <button class="btn btn-success w-100" id="placeBid">Place Bid ($1.9M)</button>
+                <button type="submit" class="btn btn-success w-100" id="placeBid">Place Bid ($1.9M)</button>
               </div>
             </div>
+            </form>
             <div class="alert alert-warning mt-2">
               <strong>Note:</strong> You currently have $2.5M remaining in your auction budget.
             </div>
@@ -366,7 +371,7 @@
 
   placeBidBtn.addEventListener('click', function() {
     const bidAmount = parseFloat(bidAmountInput.value);
-    if (bidAmount < 1850000) {
+    if (bidAmount < 10000) {
       alert('Bid amount must be at least $1.85M');
       return;
     }
@@ -379,7 +384,7 @@
     const newBid = document.createElement('div');
     newBid.className = 'list-group-item';
     newBid.innerHTML = '<div class="d-flex justify-content-between">' +
-            '<span>Virat Kohli</span>' +
+            '<span>${player.name}</span>' +
             '<strong>$' + (bidAmount / 1000000).toFixed(2) + 'M</strong>' +
             '</div>' +
             '<small class="text-muted">Your Team - just now</small>';
@@ -388,6 +393,188 @@
     // Update current bid display
     document.querySelector('.text-danger').textContent = '$' + (bidAmount / 1000000).toFixed(2) + 'M';
   });
+
+
+  document.addEventListener('DOMContentLoaded', function() {
+    // WebSocket connection setup
+    let socket;
+
+    function connectWebSocket() {
+      try {
+        const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+        const host = window.location.host;
+        const contextPath = '${pageContext.request.contextPath}' || '';
+        const endpoint = '/bidupdates';
+
+        const wsUrl = protocol + host + contextPath + endpoint;
+        console.log('Attempting to connect to:', wsUrl);
+
+        socket = new WebSocket(wsUrl);
+
+        socket.onopen = function() {
+          console.log('WebSocket connection established');
+        };
+
+        // Add this message handler
+        socket.onmessage = function(event) {
+          const bidMessage = JSON.parse(event.data);
+          console.log('Received bid update:', bidMessage);
+          updateBidDisplay(bidMessage);
+          showBidNotification(`New bid: €${bidMessage.amount}M by ${bidMessage.teamname}`, true);
+        };
+
+        socket.onclose = function(e) {
+          console.log('Socket closed. Reconnect attempt in 5s', e.reason);
+          setTimeout(connectWebSocket, 5000);
+        };
+
+        socket.onerror = function(error) {
+          console.error('WebSocket Error:', error);
+        };
+      } catch (e) {
+        console.error('WebSocket Connection Error:', e);
+      }
+    }
+
+    // function updateBidDisplay(bidMessage) {
+    //   // Update current bid display
+    //   document.getElementById('current-bid').textContent = '€' + bidMessage.amount + 'M';
+    //   document.getElementById('last-bidder').textContent = bidMessage.teamname;
+    //
+    //   // Add to bid history table
+    //   const bidHistoryTable = document.getElementById('bid-history').getElementsByTagName('tbody')[0];
+    //   const newRow = bidHistoryTable.insertRow(0);
+    //
+    //   // Match the 3 columns in your HTML
+    //   const timeCell = newRow.insertCell(0);
+    //   const bidderCell = newRow.insertCell(1);
+    //   const amountCell = newRow.insertCell(2);
+    //
+    //   const now = new Date();
+    //   timeCell.textContent = now.toLocaleTimeString();
+    //   bidderCell.textContent = bidMessage.username;
+    //   amountCell.textContent = '€' + bidMessage.amount + 'M';
+    //
+    //   // Highlight effect
+    //   newRow.classList.add('table-success');
+    //   setTimeout(() => newRow.classList.remove('table-success'), 2000);
+    //
+    //   // Auto-scroll to new bid
+    //   bidHistoryTable.parentElement.scrollTop = 0;
+    // }
+
+    function showBidNotification(message, isSuccess) {
+      // Create notification container if it doesn't exist
+      let notificationContainer = document.getElementById('notification-container');
+      if (!notificationContainer) {
+        notificationContainer = document.createElement('div');
+        notificationContainer.id = 'notification-container';
+        notificationContainer.className = 'position-fixed top-0 end-0 p-3';
+        notificationContainer.style.zIndex = '1100';
+        document.body.appendChild(notificationContainer);
+      }
+
+      const notification = document.createElement('div');
+      notification.className = `alert ${isSuccess ? 'alert-success' : 'alert-danger'} alert-dismissible fade show`;
+      notification.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+      notificationContainer.appendChild(notification);
+
+      // Auto-remove after 5 seconds
+      setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 150);
+      }, 5000);
+    }
+
+    // Initialize WebSocket
+    connectWebSocket();
+
+    // Rest of your existing code (countdown timer, form submission, etc.)
+    document.querySelectorAll('.countdown').forEach(function(element) {
+      const endTime = new Date(element.getAttribute('data-end')).getTime();
+
+      function updateCountdown() {
+        const now = new Date().getTime();
+        const distance = endTime - now;
+
+        if (distance < 0) {
+          element.innerHTML = "Auction ended";
+          document.querySelectorAll('.bid-input, .btn-bid').forEach(el => {
+            el.disabled = true;
+          });
+          return;
+        }
+
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        element.innerHTML = days + "d " + hours + "h " + minutes + "m " + seconds + "s";
+      }
+
+      updateCountdown();
+      setInterval(updateCountdown, 1000);
+    });
+
+    document.querySelectorAll('.bid-form').forEach(form => {
+      form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const bidInput = this.querySelector('input[name="bidAmount"]');
+        const playerIdInput = this.querySelector('input[name="playerId"]');
+        const amount = parseFloat(bidInput.value);
+        const playerId = parseInt(playerIdInput.value);
+
+        if (isNaN(playerId) || playerId <= 0) {
+          showBidNotification('Invalid player selected', false);
+          return;
+        }
+        if (isNaN(amount) || amount <= 0) {
+          showBidNotification('Please enter a valid bid amount (> 0)', false);
+          return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Processing...';
+
+        try {
+          const formData = new URLSearchParams();
+          formData.append('playerId', playerId);
+          formData.append('bidAmount', amount);
+
+          const response = await fetch(this.action, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: formData
+          });
+
+          if (!response.ok) {
+            const error = await response.text();
+            throw new Error(error || 'Bid failed');
+          }
+
+          bidInput.value = '';
+          showBidNotification('Bid placed successfully!', true);
+
+        } catch (error) {
+          console.error('Bid Error:', error);
+          showBidNotification(error.message, false);
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Place Bid';
+        }
+      });
+    });
+  });
+
 </script>
 </body>
 </html>

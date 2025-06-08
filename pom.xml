@@ -8,7 +8,7 @@
     <artifactId>DraftX</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>war</packaging>
-    <name>DartfX</name>
+    <name>DraftX</name>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
