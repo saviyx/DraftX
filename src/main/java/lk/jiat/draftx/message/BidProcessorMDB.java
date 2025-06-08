@@ -12,7 +12,7 @@ import lk.jiat.draftx.util.BidBroadcaster;
         activationConfig = {
                 @ActivationConfigProperty(
                         propertyName = "destinationLookup",
-                        propertyValue = "jms/BidQueue"),
+                        propertyValue = "BidQueue"),
                 @ActivationConfigProperty(
                         propertyName = "destinationType",
                         propertyValue = "jakarta.jms.Queue")

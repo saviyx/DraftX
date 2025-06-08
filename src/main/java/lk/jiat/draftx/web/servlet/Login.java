@@ -32,7 +32,7 @@ public class Login extends HttpServlet {
 
         if(login){
                 HttpSession session = request.getSession();
-                session.setAttribute("userEmail", email);
+                session.setAttribute("user", email);
 
                 response.sendRedirect( request.getContextPath() + "/home");
             }else {

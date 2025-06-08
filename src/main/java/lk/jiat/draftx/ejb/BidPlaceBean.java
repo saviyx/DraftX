@@ -17,10 +17,10 @@ public class BidPlaceBean implements BidService {
     @PersistenceContext
     private EntityManager em;
 
-    @Resource(lookup = "jms/BidConnectionFactory")
+    @Resource(lookup = "jms/Factory")
     private ConnectionFactory connectionFactory;
 
-    @Resource(lookup = "jms/BidQueue")
+    @Resource(lookup = "BidQueue")
     private Queue bidQueue;
 
     @Override

@@ -68,65 +68,93 @@
         <div class="card-body">
           <c:choose>
             <c:when test="${not empty player}">
-          <div class="row">
-            <div class="col-md-6">
-              <img src="${player.image_path}" class="img-fluid rounded mb-3" alt="IPL 2024">
-            </div>
-            <div class="col-md-6">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <span class="badge bg-success">Live</span>
-                <span class="text-muted">Ends in 2h 15m</span>
-              </div>
-              <div class="progress mb-3">
-                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 65%"></div>
-              </div>
-              <div class="mb-3">
-                <h4 class="mb-1">Current Player: ${player.name}</h4>
-                <p class="text-muted mb-2">${player.player_type} | ${player.country}</p>
-                <div class="d-flex justify-content-between">
-                  <span>Base Price:</span>
-                  <strong>$${player.basePrice}M</strong>
+              <div class="row">
+                <div class="col-md-6">
+                  <img src="${player.image_path}" class="img-fluid rounded mb-3" alt="IPL 2024">
                 </div>
-                <div class="d-flex justify-content-between">
-                  <span>Current Bid:</span>
-                  <strong class="text-danger">$${player.currentBid}M</strong>
-                </div>
-                <div class="d-flex justify-content-between">
-                  <span>Bid By:</span>
-                  <strong>Royal Challengers</strong>
+                <div class="col-md-6">
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="badge bg-success">Live</span>
+                    <span class="text-muted">Ends in 2h 15m</span>
+                  </div>
+                  <div class="progress mb-3">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 65%"></div>
+                  </div>
+                  <div class="mb-3">
+                    <h4 class="mb-1">Current Player: ${player.name}</h4>
+                    <p class="text-muted mb-2">${player.player_type} | ${player.country}</p>
+                    <div class="d-flex justify-content-between">
+                      <span>Base Price:</span>
+                      <strong>$${player.basePrice}M</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                      <span>Current Bid:</span>
+                      <strong class="text-danger" id="current-bid">$${player.currentBid}M</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                      <span>Bid By:</span>
+                      <strong id="last-bidder">Royal Challengers</strong>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
             </c:when>
             <c:otherwise>
-
+              <div class="text-center py-5">
+                <h4>No player currently available for bidding</h4>
+                <p class="text-muted">Please wait for the next player to be announced.</p>
+              </div>
             </c:otherwise>
           </c:choose>
-
 
           <!-- Bidding Controls -->
           <div class="bidding-panel mt-4 p-3 bg-light rounded">
             <h5 class="mb-3">Place Your Bid</h5>
             <form class="bid-form" method="POST" action="${pageContext.request.contextPath}/placebid">
               <input type="hidden" name="playerId" value="${not empty player ? player.id : ''}">
-            <div class="row align-items-center">
-              <div class="col-md-6 mb-3">
-                <div class="input-group">
-                  <span class="input-group-text">$</span>
-                  <input type="number" class="form-control" id="bidAmount" name="bidAmount" value="1900000" min="1850000" step="25000">
-                  <button class="btn btn-outline-secondary" type="button" id="quickBid">+25K</button>
+              <div class="row align-items-center">
+                <div class="col-md-6 mb-3">
+                  <div class="input-group">
+                    <span class="input-group-text">$</span>
+                    <input type="number" class="form-control bid-input" id="bidAmount" name="bidAmount"
+                           value="${not empty player.currentBid ? (player.currentBid * 1000000 + 25000) : 1900000}"
+                           min="${not empty player.currentBid ? (player.currentBid * 1000000 + 25000) : 1850000}"
+                           step="25000">
+                    <button class="btn btn-outline-secondary" type="button" id="quickBid">+25K</button>
+                  </div>
+                  <div class="form-text">Minimum next bid: $<span id="min-bid">${not empty player.currentBid ? (player.currentBid + 0.025) : 1.85}</span>M</div>
                 </div>
-                <div class="form-text">Minimum next bid: $1.85M</div>
+                <div class="col-md-6 mb-3">
+                  <button type="submit" class="btn btn-success w-100 btn-bid" id="placeBid">Place Bid</button>
+                </div>
               </div>
-              <div class="col-md-6 mb-3">
-                <button type="submit" class="btn btn-success w-100" id="placeBid">Place Bid ($1.9M)</button>
-              </div>
-            </div>
             </form>
             <div class="alert alert-warning mt-2">
               <strong>Note:</strong> You currently have $2.5M remaining in your auction budget.
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bid History -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h3 class="h5 mb-0">Bid History</h3>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+            <table class="table table-striped mb-0" id="bid-history">
+              <thead class="table-dark sticky-top">
+              <tr>
+                <th>Time</th>
+                <th>Bidder</th>
+                <th>Amount</th>
+              </tr>
+              </thead>
+              <tbody>
+              <!-- Bid history will be populated here by WebSocket -->
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -354,48 +382,15 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="js/script.js"></script>
 <script>
-  // Bidding functionality
-  const bidAmountInput = document.getElementById('bidAmount');
-  const quickBidBtn = document.getElementById('quickBid');
-  const placeBidBtn = document.getElementById('placeBid');
-
-  quickBidBtn.addEventListener('click', function() {
-    const currentBid = parseFloat(bidAmountInput.value);
-    bidAmountInput.value = currentBid + 25000;
-    updateBidButton();
-  });
-
-  function updateBidButton() {
-    placeBidBtn.textContent = 'Place Bid ($' + (bidAmountInput.value / 1000000).toFixed(2) + 'M)';
-  }
-
-  placeBidBtn.addEventListener('click', function() {
-    const bidAmount = parseFloat(bidAmountInput.value);
-    if (bidAmount < 10000) {
-      alert('Bid amount must be at least $1.85M');
-      return;
-    }
-
-    // Here you would typically send the bid to your server
-    alert('Bid of $' + (bidAmount / 1000000).toFixed(2) + 'M placed successfully!');
-
-    // For demo, we'll just update the UI
-    const recentBids = document.querySelector('.list-group');
-    const newBid = document.createElement('div');
-    newBid.className = 'list-group-item';
-    newBid.innerHTML = '<div class="d-flex justify-content-between">' +
-            '<span>${player.name}</span>' +
-            '<strong>$' + (bidAmount / 1000000).toFixed(2) + 'M</strong>' +
-            '</div>' +
-            '<small class="text-muted">Your Team - just now</small>';
-    recentBids.prepend(newBid);
-
-    // Update current bid display
-    document.querySelector('.text-danger').textContent = '$' + (bidAmount / 1000000).toFixed(2) + 'M';
-  });
-
-
   document.addEventListener('DOMContentLoaded', function() {
+    // DOM elements
+    const bidAmountInput = document.getElementById('bidAmount');
+    const quickBidBtn = document.getElementById('quickBid');
+    const placeBidBtn = document.getElementById('placeBid');
+    const currentBidDisplay = document.getElementById('current-bid');
+    const lastBidderDisplay = document.getElementById('last-bidder');
+    const minBidDisplay = document.getElementById('min-bid');
+
     // WebSocket connection setup
     let socket;
 
@@ -413,58 +408,83 @@
 
         socket.onopen = function() {
           console.log('WebSocket connection established');
+          showBidNotification('Connected to live bidding updates', true);
         };
 
-        // Add this message handler
         socket.onmessage = function(event) {
           const bidMessage = JSON.parse(event.data);
           console.log('Received bid update:', bidMessage);
           updateBidDisplay(bidMessage);
-          showBidNotification(`New bid: €${bidMessage.amount}M by ${bidMessage.teamname}`, true);
+          showBidNotification(`New bid: $${bidMessage.amount}M by ${bidMessage.teamname}`, true);
         };
 
         socket.onclose = function(e) {
           console.log('Socket closed. Reconnect attempt in 5s', e.reason);
+          showBidNotification('Disconnected from live updates. Reconnecting...', false);
           setTimeout(connectWebSocket, 5000);
         };
 
         socket.onerror = function(error) {
           console.error('WebSocket Error:', error);
+          showBidNotification('Connection error. Please refresh the page.', false);
         };
       } catch (e) {
         console.error('WebSocket Connection Error:', e);
       }
     }
 
-    // function updateBidDisplay(bidMessage) {
-    //   // Update current bid display
-    //   document.getElementById('current-bid').textContent = '€' + bidMessage.amount + 'M';
-    //   document.getElementById('last-bidder').textContent = bidMessage.teamname;
-    //
-    //   // Add to bid history table
-    //   const bidHistoryTable = document.getElementById('bid-history').getElementsByTagName('tbody')[0];
-    //   const newRow = bidHistoryTable.insertRow(0);
-    //
-    //   // Match the 3 columns in your HTML
-    //   const timeCell = newRow.insertCell(0);
-    //   const bidderCell = newRow.insertCell(1);
-    //   const amountCell = newRow.insertCell(2);
-    //
-    //   const now = new Date();
-    //   timeCell.textContent = now.toLocaleTimeString();
-    //   bidderCell.textContent = bidMessage.username;
-    //   amountCell.textContent = '€' + bidMessage.amount + 'M';
-    //
-    //   // Highlight effect
-    //   newRow.classList.add('table-success');
-    //   setTimeout(() => newRow.classList.remove('table-success'), 2000);
-    //
-    //   // Auto-scroll to new bid
-    //   bidHistoryTable.parentElement.scrollTop = 0;
-    // }
+    function updateBidDisplay(bidMessage) {
+      // Update current bid display
+      if (currentBidDisplay) {
+        currentBidDisplay.textContent = '$' + bidMessage.amount + 'M';
+      }
+
+      // Update last bidder
+      if (lastBidderDisplay) {
+        lastBidderDisplay.textContent = bidMessage.teamname;
+      }
+
+      // Update minimum bid
+      const newMinBid = (bidMessage.amount + 0.025).toFixed(2);
+      if (minBidDisplay) {
+        minBidDisplay.textContent = newMinBid;
+      }
+
+      // Update input field minimum and value
+      if (bidAmountInput) {
+        const newMinBidAmount = Math.floor((bidMessage.amount + 0.025) * 1000000);
+        bidAmountInput.min = newMinBidAmount;
+        bidAmountInput.value = newMinBidAmount;
+        updateBidButton();
+      }
+
+      // Add to bid history table
+      const bidHistoryTable = document.getElementById('bid-history');
+      if (bidHistoryTable) {
+        const tbody = bidHistoryTable.getElementsByTagName('tbody')[0];
+        const newRow = tbody.insertRow(0);
+
+        const timeCell = newRow.insertCell(0);
+        const bidderCell = newRow.insertCell(1);
+        const amountCell = newRow.insertCell(2);
+
+        const now = new Date();
+        timeCell.textContent = now.toLocaleTimeString();
+        bidderCell.textContent = bidMessage.teamname;
+        amountCell.textContent = '$' + bidMessage.amount + 'M';
+
+        // Highlight effect
+        newRow.classList.add('table-success');
+        setTimeout(() => newRow.classList.remove('table-success'), 3000);
+
+        // Keep only last 20 bids
+        while (tbody.rows.length > 20) {
+          tbody.deleteRow(tbody.rows.length - 1);
+        }
+      }
+    }
 
     function showBidNotification(message, isSuccess) {
-      // Create notification container if it doesn't exist
       let notificationContainer = document.getElementById('notification-container');
       if (!notificationContainer) {
         notificationContainer = document.createElement('div');
@@ -483,17 +503,105 @@
 
       notificationContainer.appendChild(notification);
 
-      // Auto-remove after 5 seconds
       setTimeout(() => {
         notification.classList.remove('show');
         setTimeout(() => notification.remove(), 150);
       }, 5000);
     }
 
-    // Initialize WebSocket
-    connectWebSocket();
+    // Bidding functionality
+    if (quickBidBtn && bidAmountInput) {
+      quickBidBtn.addEventListener('click', function() {
+        const currentBid = parseFloat(bidAmountInput.value);
+        bidAmountInput.value = currentBid + 25000;
+        updateBidButton();
+      });
+    }
 
-    // Rest of your existing code (countdown timer, form submission, etc.)
+    function updateBidButton() {
+      if (placeBidBtn && bidAmountInput) {
+        const bidValue = parseFloat(bidAmountInput.value);
+        placeBidBtn.textContent = 'Place Bid ($' + (bidValue / 1000000).toFixed(2) + 'M)';
+      }
+    }
+
+    // Update button text on input change
+    if (bidAmountInput) {
+      bidAmountInput.addEventListener('input', updateBidButton);
+      updateBidButton(); // Initialize
+    }
+
+    // Form submission
+    document.querySelectorAll('.bid-form').forEach(form => {
+      form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const bidInput = this.querySelector('input[name="bidAmount"]');
+        const playerIdInput = this.querySelector('input[name="playerId"]');
+        const amount = parseFloat(bidInput.value);
+        const playerId = parseInt(playerIdInput.value);
+
+        // Validation
+        if (isNaN(playerId) || playerId <= 0) {
+          showBidNotification('Invalid player selected', false);
+          return;
+        }
+        if (isNaN(amount) || amount <= 0) {
+          showBidNotification('Please enter a valid bid amount (> 0)', false);
+          return;
+        }
+
+        const minBid = parseFloat(bidInput.min);
+        if (amount < minBid) {
+          showBidNotification(`Bid must be at least $${(minBid / 1000000).toFixed(2)}M`, false);
+          return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Processing...';
+
+        try {
+          const formData = new URLSearchParams();
+          formData.append('playerId', playerId);
+          formData.append('bidAmount', amount);
+
+          const response = await fetch(this.action, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: formData
+          });
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            let errorMessage = 'Bid failed';
+
+            try {
+              const errorObj = JSON.parse(errorText);
+              errorMessage = errorObj.error || errorMessage;
+            } catch (e) {
+              errorMessage = errorText || errorMessage;
+            }
+
+            throw new Error(errorMessage);
+          }
+
+          const result = await response.json();
+          showBidNotification('Bid placed successfully!', true);
+
+        } catch (error) {
+          console.error('Bid Error:', error);
+          showBidNotification(error.message, false);
+        } finally {
+          submitBtn.disabled = false;
+          updateBidButton();
+        }
+      });
+    });
+
+    // Countdown timer functionality
     document.querySelectorAll('.countdown').forEach(function(element) {
       const endTime = new Date(element.getAttribute('data-end')).getTime();
 
@@ -521,60 +629,9 @@
       setInterval(updateCountdown, 1000);
     });
 
-    document.querySelectorAll('.bid-form').forEach(form => {
-      form.addEventListener('submit', async function(e) {
-        e.preventDefault();
-
-        const submitBtn = this.querySelector('button[type="submit"]');
-        const bidInput = this.querySelector('input[name="bidAmount"]');
-        const playerIdInput = this.querySelector('input[name="playerId"]');
-        const amount = parseFloat(bidInput.value);
-        const playerId = parseInt(playerIdInput.value);
-
-        if (isNaN(playerId) || playerId <= 0) {
-          showBidNotification('Invalid player selected', false);
-          return;
-        }
-        if (isNaN(amount) || amount <= 0) {
-          showBidNotification('Please enter a valid bid amount (> 0)', false);
-          return;
-        }
-
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Processing...';
-
-        try {
-          const formData = new URLSearchParams();
-          formData.append('playerId', playerId);
-          formData.append('bidAmount', amount);
-
-          const response = await fetch(this.action, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: formData
-          });
-
-          if (!response.ok) {
-            const error = await response.text();
-            throw new Error(error || 'Bid failed');
-          }
-
-          bidInput.value = '';
-          showBidNotification('Bid placed successfully!', true);
-
-        } catch (error) {
-          console.error('Bid Error:', error);
-          showBidNotification(error.message, false);
-        } finally {
-          submitBtn.disabled = false;
-          submitBtn.textContent = 'Place Bid';
-        }
-      });
-    });
+    // Initialize WebSocket connection
+    connectWebSocket();
   });
-
 </script>
 </body>
 </html>

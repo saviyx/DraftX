@@ -26,7 +26,7 @@ public class Bids {
 
     public Bids() {this.bidTime = new Date();}
 
-    public Bids(int userId, int playerId, double amount) {
+    public Bids(String userEmail, int playersId, double amount) {
         this();
         this.userEmail = userEmail;
         this.playersId = playersId;
